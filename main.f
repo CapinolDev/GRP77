@@ -137,19 +137,38 @@
    30 CONTINUE
             ITARGT = I + RKOFST(IX) * OFSMUL
             IF (ITARGT .LT. 1 .OR. ITARGT .GT. 120) GOTO 20
-                IF (BOARD(I+RKOFST(IX)*OFSMUL) .EQ. EMPTY) THEN
+                IF (BOARD(ITARGT) .EQ. EMPTY) THEN
                     CALL PSHSTK(I,ITARGT,BOARD(ITARGT))
                     OFSMUL = OFSMUL + 1
-                ELSE IF (BOARD(I+RKOFST(IX)*OFSMUL) .LT. EMPTY) THEN
+                ELSE IF (BOARD(ITARGT) .LT. EMPTY) THEN
                     CALL PSHSTK(I,ITARGT,BOARD(ITARGT))
                     GOTO 20
-                ELSE IF (BOARD(I+RKOFST(IX)*OFSMUL) .GT. EMPTY) THEN
+                ELSE IF (BOARD(ITARGT) .GT. EMPTY) THEN
                     GOTO 20 
-                ELSE IF (BOARD(I+RKOFST(IX)*OFSMUL) .EQ. OFFBRD) THEN
+                ELSE IF (BOARD(ITARGT) .EQ. OFFBRD) THEN
                     GOTO 20
                 END IF
                 GOTO 30
    20           CONTINUE 
+            ELSE IF (BOARD(I) .EQ. WBISH) THEN 
+            DO 60 IX=1,4
+                OFSMUL = 1
+   70 CONTINUE
+            ITARGT = I + BPOFST(IX) * OFSMUL
+            IF (ITARGT .LT. 1 .OR. ITARGT .GT. 120) GOTO 60
+                IF (BOARD(I+BPOFST(IX)*OFSMUL) .EQ. EMPTY) THEN
+                    CALL PSHSTK(I,ITARGT,BOARD(ITARGT))
+                    OFSMUL = OFSMUL + 1
+                ELSE IF (BOARD(I+BPOFST(IX)*OFSMUL) .LT. EMPTY) THEN
+                    CALL PSHSTK(I,ITARGT,BOARD(ITARGT))
+                    GOTO 60
+                ELSE IF (BOARD(I+BPOFST(IX)*OFSMUL) .GT. EMPTY) THEN
+                    GOTO 60 
+                ELSE IF (BOARD(I+BPOFST(IX)*OFSMUL) .EQ. OFFBRD) THEN
+                    GOTO 60
+                END IF
+                GOTO 70
+   60           CONTINUE
             END IF
 
         ELSE IF (SIDMOV.EQV..FALSE..AND.BOARD(I).LT.EMPTY) THEN 
@@ -158,22 +177,39 @@
                 OFSMUL = 1
    50 CONTINUE
             ITARGT = I + RKOFST(IX) * OFSMUL
-            IF (ITARGT .LT. 1 .OR. ITARGT .GT. 120) GOTO 20
-                IF (BOARD(I+RKOFST(IX)*OFSMUL) .EQ. EMPTY) THEN
+            IF (ITARGT .LT. 1 .OR. ITARGT .GT. 120) GOTO 40
+                IF (BOARD(ITARGT) .EQ. EMPTY) THEN
                     CALL PSHSTK(I,ITARGT,BOARD(ITARGT))
                     OFSMUL = OFSMUL + 1
-                ELSE IF (BOARD(I+RKOFST(IX)*OFSMUL) .GT. EMPTY) THEN
+                ELSE IF (BOARD(ITARGT) .GT. EMPTY) THEN
                     CALL PSHSTK(I,ITARGT,BOARD(ITARGT))
                     GOTO 40
-                ELSE IF (BOARD(I+RKOFST(IX)*OFSMUL) .LT. EMPTY) THEN
+                ELSE IF (BOARD(ITARGT) .LT. EMPTY) THEN
                     GOTO 40 
-                ELSE IF (BOARD(I+RKOFST(IX)*OFSMUL) .EQ. OFFBRD) THEN
+                ELSE IF (BOARD(ITARGT) .EQ. OFFBRD) THEN
                     GOTO 40
                 END IF
                 GOTO 50
    40           CONTINUE 
-            END IF
-        END IF
+      ELSE IF (BOARD(I) .EQ. BBISH) THEN 
+              DO 80 IX=1,4
+                  OFSMUL = 1
+   90             CONTINUE
+                  ITARGT = I + BPOFST(IX) * OFSMUL
+                  IF (ITARGT .LT. 1 .OR. ITARGT .GT. 120) GOTO 80
+
+                  IF (BOARD(ITARGT) .EQ. EMPTY) THEN
+                      CALL PSHSTK(I,ITARGT,BOARD(ITARGT))
+                      OFSMUL = OFSMUL + 1
+                      GOTO 90
+                  ELSE IF (BOARD(ITARGT) .GT. EMPTY) THEN
+                      CALL PSHSTK(I,ITARGT,BOARD(ITARGT))
+                      GOTO 80                  
+                  END IF
+                  IF (BOARD(ITARGT).LT.EMPTY) GOTO 80
+   80         CONTINUE
+          END IF
+      END IF 
    10 CONTINUE
       END
 
