@@ -6,20 +6,47 @@
       INTEGER EMPTY, OFFBRD
       INTEGER WPAWN, WKNIGHT, WBISH, WROOK, WQUEN, WKING
       INTEGER BPAWN, BKNIGHT, BBISH, BROOK, BQUEN, BKING
-
+      
       PARAMETER (EMPTY=0, OFFBRD=99)
       PARAMETER (WPAWN=1, WKNIGHT=2, WBISH=3, WROOK=4, WQUEN=5, WKING=6)
       PARAMETER (BPAWN=-1, BKNIGHT=-2, BBISH=-3, BROOK=-4, BQUEN=-5, BKI
      +NG=-6)
+
+      INTEGER MVSTCK(3,2000), CURRSP
+      COMMON /STACK/ CURRSP,MVSTCK 
+      DATA MVSTCK /6000*0/
+      DATA CURRSP /0/
       END
 
       PROGRAM MAIN
-      INTEGER BOARD(120)
-      INTEGER GETIDX
-      COMMON /PLRDAT/ BOARD
+      CHARACTER*80 CMD
+      LOGICAL ENGSID, SIDMOV
+      
       CALL INIBRD
-      WRITE(*,800) GETIDX(1,1)
-  800 FORMAT(I3)
+      ENGSID = .FALSE. 
+      SIDMOV = .TRUE. 
+   10 CONTINUE
+        READ(*,'(A)') CMD
+
+        IF (CMD(1:8) .EQ. 'xboard') THEN
+
+           CONTINUE
+        ELSE IF (CMD(1:4) .EQ. 'new') THEN
+           CALL INIBRD
+           SIDMOV = .TRUE.
+        ELSE IF (CMD(1:5) .EQ. 'force') THEN
+           ENGSID= .FALSE. 
+        ELSE IF (CMD(1:2) .EQ. 'go') THEN
+           ENGSID = SIDMOV
+           CALL DOMOVE(SIDMOV)
+        ELSE IF (CMD(1:4) .EQ. 'quit') THEN
+           STOP
+        ELSE
+           CALL PRSNMV(CMD)
+           SIDMOV = .NOT. SIDMOV
+           IF (ENGSID .EQV. SIDMOV) CALL DOMOVE(SIDMOV)
+        END IF
+      GOTO 10
       END
 
       SUBROUTINE INIBRD
@@ -78,7 +105,84 @@
       R2 = ICHAR(CMD(4:4)) - ICHAR('0')
 
       I1 = GETIDX(R1,F1)
-      I2 = GETIDX(R1,F1)
+      I2 = GETIDX(R2,F2)
 
       CALL MAKMOV(I1, I2)
+      END
+
+      SUBROUTINE DOMOVE(SIDMOV)
+      LOGICAL SIDMOV
+      INTEGER BOARD(120)
+      COMMON /PLRDAT/ BOARD 
+      INTEGER EMPTY, OFFBRD
+      INTEGER WPAWN, WKNIGHT, WBISH, WROOK, WQUEN, WKING
+      INTEGER BPAWN, BKNIGHT, BBISH, BROOK, BQUEN, BKING
+      PARAMETER (EMPTY=0, OFFBRD=99)
+      PARAMETER (WPAWN=1, WKNIGHT=2, WBISH=3, WROOK=4, WQUEN=5, WKING=6)
+      PARAMETER (BPAWN=-1, BKNIGHT=-2, BBISH=-3, BROOK=-4, BQUEN=-5, BKI
+     +NG=-6)
+      INTEGER OFSMUL 
+      INTEGER RKOFST(4), BPOFST(4), QNOFST(8)
+      DATA RKOFST /10,-10,+1,-1/ 
+      DATA BPOFST /11,+9,-9,-11/
+      DATA QNOFST /10,-10,+1,-1,11,+9,-9,-11/
+
+      DO 10 I=21,100
+        OFSMUL = 1
+        IF(BOARD(I) .EQ. EMPTY .OR. BOARD(I) .EQ. OFFBRD) GOTO 10 
+        IF(SIDMOV.EQV..TRUE..AND.BOARD(I).GT.EMPTY) THEN
+            IF (BOARD(I) .EQ. WROOK) THEN
+                DO 20 IX=1,4
+                OFSMUL = 1
+   30 CONTINUE
+            ITARGT = I + RKOFST(IX) * OFSMUL
+            IF (ITARGT .LT. 1 .OR. ITARGT .GT. 120) GOTO 20
+                IF (BOARD(I+RKOFST(IX)*OFSMUL) .EQ. EMPTY) THEN
+                    CALL PSHSTK(I,ITARGT,BOARD(ITARGT))
+                    OFSMUL = OFSMUL + 1
+                ELSE IF (BOARD(I+RKOFST(IX)*OFSMUL) .LT. EMPTY) THEN
+                    CALL PSHSTK(I,ITARGT,BOARD(ITARGT))
+                    GOTO 20
+                ELSE IF (BOARD(I+RKOFST(IX)*OFSMUL) .GT. EMPTY) THEN
+                    GOTO 20 
+                ELSE IF (BOARD(I+RKOFST(IX)*OFSMUL) .EQ. OFFBRD) THEN
+                    GOTO 20
+                END IF
+                GOTO 30
+   20           CONTINUE 
+            END IF
+
+        ELSE IF (SIDMOV.EQV..FALSE..AND.BOARD(I).LT.EMPTY) THEN 
+        IF (BOARD(I) .EQ. BROOK) THEN
+                DO 40 IX=1,4
+                OFSMUL = 1
+   50 CONTINUE
+            ITARGT = I + RKOFST(IX) * OFSMUL
+            IF (ITARGT .LT. 1 .OR. ITARGT .GT. 120) GOTO 20
+                IF (BOARD(I+RKOFST(IX)*OFSMUL) .EQ. EMPTY) THEN
+                    CALL PSHSTK(I,ITARGT,BOARD(ITARGT))
+                    OFSMUL = OFSMUL + 1
+                ELSE IF (BOARD(I+RKOFST(IX)*OFSMUL) .GT. EMPTY) THEN
+                    CALL PSHSTK(I,ITARGT,BOARD(ITARGT))
+                    GOTO 40
+                ELSE IF (BOARD(I+RKOFST(IX)*OFSMUL) .LT. EMPTY) THEN
+                    GOTO 40 
+                ELSE IF (BOARD(I+RKOFST(IX)*OFSMUL) .EQ. OFFBRD) THEN
+                    GOTO 40
+                END IF
+                GOTO 50
+   40           CONTINUE 
+            END IF
+        END IF
+   10 CONTINUE
+      END
+
+      SUBROUTINE PSHSTK(FROM,TOWARD,LSTPC)
+        INTEGER CURRSP, MVSTCK(3,2000)
+        COMMON /STACK/ CURRSP,MVSTCK
+        INTEGER FROM,TOWARD,LSTPC
+        CURRSP = CURRSP + 1
+        MVSTCK(1,CURRSP) = FROM
+        MVSTCK(2,CURRSP) = TOWARD 
+        MVSTCK(3,CURRSP) = LSTPC 
       END
