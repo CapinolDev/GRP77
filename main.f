@@ -156,19 +156,38 @@
    70 CONTINUE
             ITARGT = I + BPOFST(IX) * OFSMUL
             IF (ITARGT .LT. 1 .OR. ITARGT .GT. 120) GOTO 60
-                IF (BOARD(I+BPOFST(IX)*OFSMUL) .EQ. EMPTY) THEN
+                IF (BOARD(ITARGT) .EQ. EMPTY) THEN
                     CALL PSHSTK(I,ITARGT,BOARD(ITARGT))
                     OFSMUL = OFSMUL + 1
-                ELSE IF (BOARD(I+BPOFST(IX)*OFSMUL) .LT. EMPTY) THEN
+                ELSE IF (BOARD(ITARGT) .LT. EMPTY) THEN
                     CALL PSHSTK(I,ITARGT,BOARD(ITARGT))
                     GOTO 60
-                ELSE IF (BOARD(I+BPOFST(IX)*OFSMUL) .GT. EMPTY) THEN
+                ELSE IF (BOARD(ITARGT) .GT. EMPTY) THEN
                     GOTO 60 
-                ELSE IF (BOARD(I+BPOFST(IX)*OFSMUL) .EQ. OFFBRD) THEN
+                ELSE IF (BOARD(ITARGT) .EQ. OFFBRD) THEN
                     GOTO 60
                 END IF
                 GOTO 70
    60           CONTINUE
+      ELSE IF (BOARD(I) .EQ. WQUEN) THEN 
+            DO 100 IX=1,8
+                OFSMUL = 1
+  110 CONTINUE
+            ITARGT = I + QNOFST(IX) * OFSMUL
+            IF (ITARGT .LT. 1 .OR. ITARGT .GT. 120) GOTO 100
+                IF (BOARD(ITARGT) .EQ. EMPTY) THEN
+                    CALL PSHSTK(I,ITARGT,BOARD(ITARGT))
+                    OFSMUL = OFSMUL + 1
+                ELSE IF (BOARD(ITARGT) .LT. EMPTY) THEN
+                    CALL PSHSTK(I,ITARGT,BOARD(ITARGT))
+                    GOTO 100
+                ELSE IF (BOARD(ITARGT) .GT. EMPTY) THEN
+                    GOTO 100 
+                ELSE IF (BOARD(ITARGT) .EQ. OFFBRD) THEN
+                    GOTO 100
+                END IF
+                GOTO 110
+  100 CONTINUE
             END IF
 
         ELSE IF (SIDMOV.EQV..FALSE..AND.BOARD(I).LT.EMPTY) THEN 
@@ -208,9 +227,29 @@
                   END IF
                   IF (BOARD(ITARGT).LT.EMPTY) GOTO 80
    80         CONTINUE
+      ELSE IF (BOARD(I) .EQ. BQUEN) THEN 
+            DO 120 IX=1,8
+                OFSMUL = 1
+  130 CONTINUE
+            ITARGT = I + QNOFST(IX) * OFSMUL
+            IF (ITARGT .LT. 1 .OR. ITARGT .GT. 120) GOTO 120
+                IF (BOARD(ITARGT) .EQ. EMPTY) THEN
+                    CALL PSHSTK(I,ITARGT,BOARD(ITARGT))
+                    OFSMUL = OFSMUL + 1
+                ELSE IF (BOARD(ITARGT) .GT. EMPTY) THEN
+                    CALL PSHSTK(I,ITARGT,BOARD(ITARGT))
+                    GOTO 120
+                ELSE IF (BOARD(ITARGT) .LT. EMPTY) THEN
+                    GOTO 120 
+                ELSE IF (BOARD(ITARGT) .EQ. OFFBRD) THEN
+                    GOTO 120
+                END IF
+                GOTO 130
+  120 CONTINUE
           END IF
       END IF 
    10 CONTINUE
+      
       END
 
       SUBROUTINE PSHSTK(FROM,TOWARD,LSTPC)
