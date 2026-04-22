@@ -19,7 +19,6 @@
       PROGRAM MAIN
       CHARACTER*80 CMD
       LOGICAL ENGSID, SIDMOV
-      
       CALL INIBRD
       ENGSID = .FALSE. 
       SIDMOV = .TRUE. 
@@ -27,7 +26,6 @@
         READ(*,'(A)') CMD
 
         IF (CMD(1:8) .EQ. 'xboard') THEN
-
            CONTINUE
         ELSE IF (CMD(1:4) .EQ. 'new') THEN
            CALL INIBRD
@@ -39,12 +37,15 @@
            CALL DOMOVE(SIDMOV)
         ELSE IF (CMD(1:4) .EQ. 'quit') THEN
            STOP
+        ELSE IF (CMD(1:5).EQ.'print') THEN 
+            CALL PRTBRD
         ELSE
            CALL PRSNMV(CMD)
            SIDMOV = .NOT. SIDMOV
            IF (ENGSID .EQV. SIDMOV) CALL DOMOVE(SIDMOV)
         END IF
       GOTO 10
+  900 FORMAT(1I2)
       END
 
       SUBROUTINE INIBRD
@@ -260,3 +261,15 @@
         MVSTCK(3,CURRSP) = LSTPC 
       END
       
+      SUBROUTINE PRTBRD
+      INTEGER GETIDX
+      INTEGER INBRD(120)
+      COMMON /PLRDAT/ INBRD 
+      DO10IX=8,1,-1
+      WRITE(*,900)INBRD(GETIDX(IX,1)),INBRD(GETIDX(IX,2)),INBRD(GETIDX(I
+     1X,3)),INBRD(GETIDX(IX,4)),INBRD(GETIDX(IX,5)),INBRD(GETIDX(IX,6)),
+     2INBRD(GETIDX(IX,7)),INBRD(GETIDX(IX,8))
+   10 CONTINUE  
+  900 FORMAT(8I4)
+  910 FORMAT(A)
+      END 
